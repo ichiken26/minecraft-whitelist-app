@@ -1,0 +1,9 @@
+node_modules/
+.nuxt/
+.output/
+.env
+.gradle/
+plugin/build/
+plugin/.gradle/
+*.jar
+*.db
