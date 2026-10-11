@@ -1,0 +1,22 @@
+[Unit]
+Description=Kokage Minecraft Whitelist Admin UI
+Wants=network-online.target tailscaled.service
+After=network-online.target tailscaled.service
+
+[Service]
+Type=simple
+User=minecraft
+Group=minecraft
+WorkingDirectory=/opt/kokage-manager/app
+EnvironmentFile=/etc/kokage-manager.env
+ExecStart=/usr/bin/node .output/server/index.mjs
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/minecraft/plugins
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
