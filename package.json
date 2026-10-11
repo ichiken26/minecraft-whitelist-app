@@ -1,0 +1,1 @@
+{"name":"kokage-whitelist","private":true,"type":"module","scripts":{"dev":"nuxt dev","build":"nuxt build","start":"node .output/server/index.mjs","typecheck":"nuxt typecheck"},"dependencies":{"nuxt":"^4.1.0","vue":"^3.5.0","vue-router":"^4.5.0"},"devDependencies":{"typescript":"^5.9.0","vue-tsc":"^3.1.0"}}
