@@ -1,0 +1,6 @@
+name: KokageWhitelist
+version: 0.1.0
+main: dev.kokage.whitelist.KokageWhitelist
+api-version: '26.2'
+description: Approve queued Java and Floodgate Bedrock players by authenticated UUID
+softdepend: [floodgate]
