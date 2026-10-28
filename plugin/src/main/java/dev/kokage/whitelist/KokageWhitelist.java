@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.Reader;
@@ -21,14 +22,51 @@ import java.util.concurrent.TimeUnit;
 public final class KokageWhitelist extends JavaPlugin implements Listener {
     private Path pending;
     private Path completed;
+    private Path updateNotice;
+    private Path logFile;
+    private long logPosition = 0;
 
     @Override public void onEnable() {
         pending = getDataFolder().toPath().resolve("pending");
         completed = getDataFolder().toPath().resolve("completed");
+        updateNotice = getDataFolder().toPath().resolve("update-notice");
+        logFile = getServer().getWorldContainer().toPath().resolve("logs/latest.log");
         try { Files.createDirectories(pending); Files.createDirectories(completed); }
         catch (Exception e) { throw new IllegalStateException("Cannot prepare queue directories", e); }
         getServer().getPluginManager().registerEvents(this, this);
+        // Poll Geyser log output off the server thread; do not read historical rotated logs.
+        getServer().getScheduler().runTaskTimerAsynchronously(this, this::checkGeyserLog, 20L * 10, 20L * 30);
         getLogger().info("Whitelist approval queue enabled. Keep enforce-whitelist=true.");
+    }
+
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        if (Files.isRegularFile(updateNotice)) {
+            event.getPlayer().sendMessage("§e[Geyser] 管理者に統合版のアップデートを伝えてください");
+        }
+    }
+
+    private void checkGeyserLog() {
+        try {
+            if (!Files.isRegularFile(logFile)) return;
+            long size = Files.size(logFile);
+            if (size < logPosition) logPosition = 0; // log rotated
+            // Read at most the last 256 KiB; notifications are short.
+            long from = Math.max(logPosition, size - 262144);
+            byte[] bytes;
+            try (var file = java.nio.channels.FileChannel.open(logFile, StandardOpenOption.READ)) {
+                file.position(from);
+                var buffer = java.nio.ByteBuffer.allocate((int) (size - from));
+                while (buffer.hasRemaining() && file.read(buffer) > 0) { }
+                bytes = java.util.Arrays.copyOf(buffer.array(), buffer.position());
+            }
+            logPosition = size;
+            String lines = new String(bytes, StandardCharsets.UTF_8);
+            if (lines.contains("new Geyser update available") || lines.contains("update available to support Bedrock")) {
+                Files.writeString(updateNotice, java.time.Instant.now().toString(), StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            }
+        } catch (Exception e) { getLogger().warning("Update log monitor: " + e.getMessage()); }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

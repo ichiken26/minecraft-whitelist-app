@@ -3,7 +3,7 @@ import { mkdir, readdir, readFile, writeFile, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 
 export type Entry = { id: string; name: string; edition: 'java' | 'bedrock'; op: boolean; createdAt: string; uuid?: string; status?: string }
-const root = () => process.env.QUEUE_DIR || '/opt/minecraft/plugins/KokageWhitelist'
+const root = () => process.env.QUEUE_DIR || '/srv/minecraft-container-test/plugins/KokageWhitelist'
 const dirs = () => ({ pending: join(root(), 'pending'), completed: join(root(), 'completed') })
 export async function entries() {
   const d = dirs()
