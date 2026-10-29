@@ -1,0 +1,9 @@
+[Unit]
+Description=Safely update Geyser and Floodgate in mc-container-test
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/sbin/kokage-geyser-update.sh
+TimeoutStartSec=600

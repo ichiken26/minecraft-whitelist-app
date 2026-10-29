@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch manual Geyser update requests
+
+[Path]
+PathExists=/srv/minecraft-container-test/plugins/KokageWhitelist/update-request
+Unit=kokage-geyser-update.service
+
+[Install]
+WantedBy=multi-user.target
